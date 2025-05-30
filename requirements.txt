@@ -1,0 +1,7 @@
+requests
+selenium 
+pyyaml
+2captcha-python
+undetected-chromedriver
+webdriver-manager
+setuptools

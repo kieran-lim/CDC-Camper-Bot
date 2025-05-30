@@ -1,0 +1,144 @@
+# ---------------------------- TWO-CAPTCHA CONFIG ---------------------------- #
+# This program uses the 2captcha API to solve captchas on the website. See README.md for more info.
+two_captcha_config:
+  api_key: "!KEY_HERE!"                       # Your 2captcha API key here.
+  enabled: True                               # If True, 2captcha will be used to solve captchas. If False, you will have to set headless_mode in browser_config to False and solve the captchas manually.
+  debug_mode: True                            # Whether to print out 2captcha debug info.
+# ------------------------------------- - ------------------------------------ #
+
+
+# ---------------------------- DISCORD BOT CONFIG ---------------------------- #
+# Discord integration using webhooks
+discord_config:
+  discord_notification_enabled: True          # Whether to push notifications to Discord webhook
+  webhook_url: "!WEBHOOK_URL_HERE!"           # Discord webhook URL for main notifications
+  queries_webhook_url: "!QUERIES_WEBHOOK_URL!" # Webhook URL for slot check queries channel
+  reservations_webhook_url: "!RESERVATIONS_WEBHOOK_URL!" # Webhook URL for successful reservations channel
+  store_value_webhook_url: "!STORE_VALUE_WEBHOOK_URL!"  # Webhook URL for store value warnings channel
+  error_logs_webhook_url: "!ERROR_LOGS_WEBHOOK_URL!"   # Webhook URL for detailed error logs
+  bot_username: "CDC Bot"                     # Username to show for webhook messages
+  avatar_url: ""                              # Avatar URL for the webhook (optional)
+  send_logs_to_discord: False                 # Set to False to disable sending logs to Discord
+  send_queries_to_discord: True               # Whether to send slot check queries to Discord
+  send_error_logs_to_discord: True            # Whether to send detailed error logs to Discord
+# ------------------------------------- - ------------------------------------ #
+
+
+# ------------------------------ PROGRAM CONFIG ------------------------------ #
+program_config:
+  auto_reserve: true  # Automatically reserve slots when found
+  auto_restart: true  # Automatically restart the program if it crashes
+  reserve_for_same_day: false  # Allow reserving slots for the same day
+  book_from_other_teams: True                 # Whether to book from other OneTeams (User must be a OneTeam member).
+  max_concurrent_accounts: 0  # Maximum number of accounts to run concurrently (0 for unlimited)
+  store_value_threshold: 100  # Alert when store value falls below this amount
+
+  # Default booking restrictions - these will be used if an account doesn't define its own
+  booking_restrictions:
+    # Dates to skip completely (format: DD/MM/YYYY)
+    skip_dates:
+      - "25/12/2023"  # Christmas example
+    
+    # Days of week to skip completely (0=Monday, 1=Tuesday, ..., 6=Sunday)
+    skip_days_of_week:
+      - 0  # Skip all Mondays
+    
+    # Time restrictions for specific dates (format: DD/MM/YYYY)
+    date_time_restrictions:
+      - date: "06/03/2023"
+        avoid_times:
+          - start: "09:00"  # Avoid morning slots on March 6th
+            end: "12:00"
+    
+    # Time restrictions for days of week (0=Monday, 1=Tuesday, ..., 6=Sunday)
+    day_time_restrictions:
+      - day: 4  # Friday
+        avoid_times:
+          - start: "13:00"  # Avoid afternoon slots on Fridays
+            end: "17:00"
+    
+    # Maximum lessons per day (defaults to unlimited if not specified)
+    max_lessons_per_day: 2  # Book maximum 2 lessons on any given day
+
+  slots_per_type:                             # How many slots to try and reserve per type.
+    practical: 6
+    pt: 1
+
+# Account Configuration
+# You must define at least one account in the accounts section below
+accounts:
+  - name: "Account1"                          # A friendly name for the account (used in logs and notifications)
+    username: "!USERNAME_HERE!"               # CDC Username
+    password: "!PASSWORD_HERE!"               # CDC Password
+    enabled: True                             # Whether this account should be monitored
+    auto_confirm: True                        # Whether to automatically confirm reserved slots for this account
+    monitored_types:                          # Which session types to monitor for this account
+      practical: True
+      pt: False
+    # Account-specific booking restrictions (optional - will override the global settings)
+    booking_restrictions:
+      skip_dates:
+        - "23/01/2023"                        # Account1 will skip this date
+        - "24/01/2023"
+      skip_days_of_week:
+        - 1                                   # Account1 will skip Tuesdays
+      date_time_restrictions:
+        - date: "07/03/2023"
+          avoid_times:
+            - start: "10:00" 
+              end: "14:00"
+      max_lessons_per_day: 1                  # Account1 can only book 1 lesson per day
+  
+  # Example of a second account configuration
+  - name: "Account2"
+    username: "!USERNAME2_HERE!"
+    password: "!PASSWORD2_HERE!"
+    enabled: True
+    auto_confirm: False                       # This account requires manual confirmation
+    monitored_types:
+      practical: False
+      pt: True
+    # Different booking restrictions for Account2
+    booking_restrictions:
+      skip_dates:
+        - "27/02/2023"                        # Account2 will skip this date
+      skip_days_of_week:
+        - 5                                   # Account2 will skip Saturdays
+      day_time_restrictions:
+        - day: 2                              # Wednesday
+          avoid_times:
+            - start: "08:00"                  # No early morning slots on Wednesday
+              end: "10:00"
+      max_lessons_per_day: 3                  # Account2 can book up to 3 lessons per day
+
+  # Add more accounts as needed
+  # - name: "Account3"
+  #   username: "!USERNAME3_HERE!"
+  #   password: "!PASSWORD3_HERE!"
+  #   enabled: True
+  #   monitored_types:
+  #     practical: True
+  #     pt: True
+  #   # You can choose to not specify booking_restrictions for an account
+  #   # In that case, the global restrictions will be used
+
+browser_config:
+  headless_mode: false  # Set to true to run Chrome in headless mode
+  chrome_version: null  # Set to null for auto-detection, or specify version number (e.g., 136)
+  flaresolverr_url: "http://localhost:8191/v1"  # URL for FlareSolverr instance
+  flaresolverr_enabled: false  # Set to true to use FlareSolverr for Cloudflare bypass
+
+# ------------------------------------- - ------------------------------------ #
+
+
+# -------------------------------- LOG CONFIG -------------------------------- #
+log_config:
+  log_level: 1                                # 1 - DEBUG, 2 - INFO, 3 - WARN, 4- ERROR: If log_level == 3, then only WARN, ERROR will be shown in logs
+  print_log_to_output: True                   # Whether to prints log to console
+  write_log_to_file: True                     # Whether to write log to file (found in $(workspace)/logs/)
+  clear_logs_init: False                      # Whether to delete old log files before at the start of every execution
+  appends_stack_call_to_log: False            # Whether to display stack_info in log
+  save_solved_captchas: False                 # Whether to save solved captchas to $(workspace)/solved_captchas/
+  send_logs_to_discord: False                 # Set to False to disable sending logs to Discord
+  discord_log_level: 2                        # Minimum log level to send to Discord: 1=DEBUG, 2=INFO, 3=WARN, 4=ERROR
+# ------------------------------------- - ------------------------------------ #
